@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grossschreibung üben</title>
+<style>
+:root {
+  --bg: #f6f5f1;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #5b6370;
+  --line: #dcd9d0;
+  --accent: #1f5fae;
+  --ok: #1e7b3c;
+  --ok-bg: #e5f4e4;
+  --warn: #a35a00;
+  --warn-bg: #f9eeda;
+  --bad: #b3261e;
+  --bad-bg: #fbebeb;
+  /* Farben der vier Stifte (Deutscher Vierer) */
+  --r1: #1f5fae;  /* 01 Satzanfänge & Titel */
+  --r2: #1e7b3c;  /* 02 Namen */
+  --r3: #c25e00;  /* 03 Nomen & Nominalisierungen */
+  --r4: #7b3fb0;  /* 04 Höflichkeitspronomen */
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  font-size: 17px;
+}
+
+header.top {
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+header.top a { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top h1 { font-size: 1.15rem; margin: 0; }
+
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+
+h2 { font-size: 1.25rem; margin: 0 0 8px; }
+h3 { font-size: 1.05rem; margin: 18px 0 8px; }
+p { margin: 0 0 10px; }
+.muted { color: var(--muted); font-size: 0.95rem; }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 8px 14px;
+  color: var(--text);
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+button.selected { background: #e7f1fb; border-color: var(--accent); font-weight: 600; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
+
+.progress { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: var(--muted); font-size: 0.95rem; }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 18px; }
+.bar > div { height: 100%; background: var(--accent); transition: width .3s; }
+
+/* ---------- Startseite ---------- */
+.games { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.games a.card { display: block; text-decoration: none; color: inherit; transition: border-color .15s; }
+.games a.card:hover { border-color: var(--accent); }
+
+/* ---------- Adjektivprobe ---------- */
+.sentence { font-size: 1.3rem; line-height: 1.8; margin: 8px 0 4px; }
+.target { font-weight: 700; letter-spacing: 0.02em; }
+.slot {
+  display: inline-block; min-width: 2.2em; border-bottom: 2px dashed var(--accent);
+  color: var(--accent); text-align: center; margin: 0 2px;
+}
+.ins { background: #e7f1fb; color: var(--accent); border-radius: 4px; padding: 0 4px; font-weight: 600; }
+.step { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 14px; }
+.step.locked { opacity: 0.45; pointer-events: none; }
+.step-title { font-weight: 700; margin-bottom: 4px; }
+.step-title .num {
+  display: inline-grid; place-items: center; width: 1.6em; height: 1.6em; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 0.85rem; margin-right: 6px;
+}
+.preview { background: #faf9f6; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; font-size: 1.15rem; margin: 8px 0; }
+
+.feedback { border-radius: 8px; padding: 12px 16px; margin-top: 14px; }
+.feedback.ok { background: var(--ok-bg); border: 1px solid #b9dfbe; }
+.feedback.part { background: var(--warn-bg); border: 1px solid #ecd3a6; }
+.feedback.bad { background: var(--bad-bg); border: 1px solid #efc4c1; }
+.feedback ul { margin: 6px 0 0; padding-left: 20px; }
+.feedback li { margin-bottom: 4px; }
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+table.result { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
+table.result th, table.result td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+
+/* ---------- Deutscher Vierer ---------- */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 8px 0 4px; }
+.rule { border: 2px solid; border-radius: 8px; padding: 6px 10px; font-size: 0.92rem; background: #fff; }
+.rule b { display: block; }
+.rule.r1 { border-color: var(--r1); } .rule.r1 b { color: var(--r1); }
+.rule.r2 { border-color: var(--r2); } .rule.r2 b { color: var(--r2); }
+.rule.r3 { border-color: var(--r3); } .rule.r3 b { color: var(--r3); }
+.rule.r4 { border-color: var(--r4); } .rule.r4 b { color: var(--r4); }
+
+.text-box {
+  font-size: 1.2rem; line-height: 2.2; background: #fff; border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px 20px; margin: 12px 0; position: relative;
+}
+.w { cursor: pointer; border-radius: 4px; padding: 1px 2px; border-bottom: 3px solid transparent; }
+.w:hover { background: #f0efec; }
+.w.c1 { border-bottom-color: var(--r1); color: var(--r1); font-weight: 600; }
+.w.c2 { border-bottom-color: var(--r2); color: var(--r2); font-weight: 600; }
+.w.c3 { border-bottom-color: var(--r3); color: var(--r3); font-weight: 600; }
+.w.c4 { border-bottom-color: var(--r4); color: var(--r4); font-weight: 600; }
+.w.active { outline: 2px solid var(--accent); }
+.text-box.checked .w { cursor: default; }
+.w.res-ok { background: var(--ok-bg); }
+.w.res-rule { background: var(--warn-bg); }
+.w.res-missed { background: var(--bad-bg); border-bottom: 3px dashed var(--bad); color: var(--bad); font-weight: 600; }
+.w.res-false { background: var(--bad-bg); text-decoration: line-through; color: var(--bad); }
+.w sup { font-size: 0.65em; font-weight: 700; margin-left: 1px; }
+
+.menu {
+  position: absolute; z-index: 10; background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.14); padding: 8px; display: grid; gap: 6px; width: 250px; font-size: 0.95rem; line-height: 1.3;
+}
+.menu .menu-title { font-size: 0.85rem; color: var(--muted); padding: 2px 4px; }
+.menu button { text-align: left; border-width: 2px; }
+.menu button.m1 { border-color: var(--r1); } .menu button.m2 { border-color: var(--r2); }
+.menu button.m3 { border-color: var(--r3); } .menu button.m4 { border-color: var(--r4); }
+.menu button.m0 { border-style: dashed; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.9rem; margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+
+.errors { margin: 8px 0 0; padding-left: 20px; }
+.errors li { margin-bottom: 4px; }
+
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .sentence { font-size: 1.12rem; }
+  .text-box { font-size: 1.08rem; padding: 12px 14px; }
+}
+
+.view { display: none; }
+.view.on { display: block; }
+header.top a.back { display: none; }
+body.ingame header.top a.back { display: inline; }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="#">← Übersicht</a>
+  <h1 id="kopf">Grossschreibung üben</h1>
+</header>
+
+<!-- ===== Startseite ===== -->
+<main class="view" id="view-start">
+  <div class="card">
+    <h2>Willkommen</h2>
+    <p>Hier üben Sie, welche Wörter im Deutschen grossgeschrieben werden. Wählen Sie ein Spiel.</p>
+  </div>
+  <div class="games">
+    <a class="card" href="#adjektivprobe">
+      <h2>Artikel-Adjektivprobe</h2>
+      <p>Bauen Sie die Probe selbst in den Satz ein und entscheiden Sie: Nomen oder nicht? Gross oder klein?</p>
+      <p class="muted">Thema: Ihr Lohn und Ihre Lehre</p>
+    </a>
+    <a class="card" href="#vierer">
+      <h2>Der Deutsche Vierer</h2>
+      <p>Klicken Sie die Wörter an, die grossgeschrieben werden, und ordnen Sie jedem Wort die passende Regel zu.</p>
+      <p class="muted">01 Satzanfänge & Titel · 02 Namen · 03 Nomen & Nominalisierungen · 04 Höflichkeitspronomen</p>
+    </a>
+  </div>
+</main>
+
+<!-- ===== Spiel 1: Artikel-Adjektivprobe ===== -->
+<main class="view" id="view-adjektivprobe">
+  <div class="card" id="ap-intro">
+    <h2>So funktioniert die Probe</h2>
+    <p>Stellen Sie einen <b>Begleiter</b> (Artikel, Pronomen) und ein <b>Adjektiv</b> direkt vor das fragliche Wort.
+      Ist der Satz danach noch korrekt, ist das Wort ein Nomen oder eine Nominalisierung. Dann schreiben Sie es <b>gross</b>.</p>
+    <p class="muted">Tipp: «beim», «zum» und «vom» enthalten schon einen Begleiter (bei dem, zu dem, von dem).</p>
+    <div class="actions"><button class="primary" id="ap-start">Spiel starten</button></div>
+  </div>
+  <div id="ap-game"></div>
+</main>
+
+<!-- ===== Spiel 2: Der Deutsche Vierer ===== -->
+<main class="view" id="view-vierer">
+  <div class="card">
+    <h2>Auftrag</h2>
+    <p>Der Text ist ganz kleingeschrieben. <b>Klicken Sie</b> auf jedes Wort, das grossgeschrieben werden
+      muss, und <b>wählen Sie</b>, warum es grossgeschrieben wird. Das Wort erscheint dann in der Farbe der Regel.</p>
+    <div class="rules">
+      <div class="rule r1"><b>01</b>Satzanfänge & Titel</div>
+      <div class="rule r2"><b>02</b>Namen von Personen, Orten etc.</div>
+      <div class="rule r3"><b>03</b>Nomen und Nominalisierungen (z. B. die Arbeit, das Arbeiten)</div>
+      <div class="rule r4"><b>04</b>Höflichkeitspronomen (direkte Anrede: Sie, Ihre …)</div>
+    </div>
+    <p class="muted">Unsicher bei 03? Machen Sie die Artikel-Adjektivprobe: Passt ein Begleiter + Adjektiv vor das Wort?
+      Passen zwei Regeln (z. B. Satzanfang und Nomen), ist jede davon richtig.</p>
+  </div>
+  <div id="v-game"></div>
+</main>
+
+<script>
+/* ================================================================
+   INHALTE – hier können Sie eigene Sätze und Texte ergänzen
+   ================================================================ */
+/*
+ * Übungssätze für die Artikel-Adjektivprobe
+ * ------------------------------------------
+ * So fügen Sie einen eigenen Satz hinzu (Eintrag kopieren und anpassen):
+ *
+ *   vor:      Text VOR dem fraglichen Wort (inkl. Leerschlag am Ende)
+ *   wort:     das fragliche Wort, kleingeschrieben (wird im Spiel in GROSSBUCHSTABEN gezeigt)
+ *   nach:     Text NACH dem Wort (inkl. Satzzeichen)
+ *   adjektiv: Grundform des Adjektivs, das für die Probe angeboten wird
+ *   nomen:    true  = Nomen/Nominalisierung (grossschreiben)
+ *             false = kein Nomen (kleinschreiben)
+ *   passt:    nur bei nomen: true – Kombinationen, die einen korrekten Satz ergeben.
+ *             begleiter: "" bedeutet «Begleiter steht schon im Satz» (z. B. das, beim, zum).
+ *             adjektiv:  die richtig gebeugte Form.
+ *   erklaerung: (optional) Zusatz, der nach dem Prüfen angezeigt wird.
+ */
+const ADJEKTIVPROBE_SAETZE = [
+  {
+    vor: "Am Anfang war das ", wort: "sparen", nach: " für mich schwierig.",
+    adjektiv: "konsequent", nomen: true,
+    passt: [{ begleiter: "", adjektiv: "konsequente" }],
+    erklaerung: "Der Begleiter «das» steht schon im Satz. Es braucht nur noch das Adjektiv."
+  },
+  {
+    vor: "Ich möchte jeden Monat 100 Franken ", wort: "sparen", nach: ".",
+    adjektiv: "regelmässig", nomen: false,
+    erklaerung: "«sparen» ist hier ein Verb: Was möchte ich tun? Sparen."
+  },
+  {
+    vor: "Beim ", wort: "einkaufen", nach: " gebe ich oft zu viel aus.",
+    adjektiv: "spontan", nomen: true,
+    passt: [{ begleiter: "", adjektiv: "spontanen" }],
+    erklaerung: "«beim» = bei dem. Der Begleiter steckt also schon im Wort «beim»."
+  },
+  {
+    vor: "Am Samstag gehe ich mit Kolleginnen ", wort: "einkaufen", nach: ".",
+    adjektiv: "gemütlich", nomen: false,
+    erklaerung: "«einkaufen» ist hier ein Verb: Was mache ich am Samstag? Ich gehe einkaufen."
+  },
+  {
+    vor: "Für mich ist ", wort: "sparen", nach: " sehr wichtig.",
+    adjektiv: "regelmässig", nomen: true,
+    passt: [
+      { begleiter: "das", adjektiv: "regelmässige" },
+      { begleiter: "ein", adjektiv: "regelmässiges" }
+    ],
+    erklaerung: "Hier fehlt ein Begleiter. Mit «das regelmässige» ist der Satz korrekt."
+  },
+  {
+    vor: "Wir müssen die Ausgaben gut ", wort: "planen", nach: ".",
+    adjektiv: "genau", nomen: false,
+    erklaerung: "«planen» ist hier ein Verb: Was müssen wir tun? Planen."
+  },
+  {
+    vor: "Die Berufsbildnerin hilft mir beim ", wort: "planen", nach: " meines Budgets.",
+    adjektiv: "genau", nomen: true,
+    passt: [{ begleiter: "", adjektiv: "genauen" }],
+    erklaerung: "«beim» = bei dem. Nach «dem» endet das Adjektiv auf -en."
+  },
+  {
+    vor: "Nach dem ", wort: "arbeiten", nach: " bin ich oft müde.",
+    adjektiv: "lang", nomen: true,
+    passt: [{ begleiter: "", adjektiv: "langen" }]
+  },
+  {
+    vor: "Ich ", wort: "arbeite", nach: " gerne im Team.",
+    adjektiv: "motiviert", nomen: false,
+    erklaerung: "«arbeite» ist eine gebeugte Verbform: ich arbeite, du arbeitest …"
+  },
+  {
+    vor: "Im Betrieb lerne ich das ", wort: "abrechnen", nach: " an der Kasse.",
+    adjektiv: "genau", nomen: true,
+    passt: [{ begleiter: "", adjektiv: "genaue" }]
+  },
+  {
+    vor: "Mir macht ", wort: "beraten", nach: " von Kundinnen Spass.",
+    adjektiv: "freundlich", nomen: true,
+    passt: [
+      { begleiter: "das", adjektiv: "freundliche" },
+      { begleiter: "ein", adjektiv: "freundliches" }
+    ]
+  },
+  {
+    vor: "Ich lerne, Kundinnen freundlich zu ", wort: "beraten", nach: ".",
+    adjektiv: "kompetent", nomen: false,
+    erklaerung: "Nach «zu» steht hier die Grundform eines Verbs (zu beraten)."
+  },
+  {
+    vor: "Wegen des ", wort: "lernens", nach: " für die Prüfung habe ich wenig Zeit.",
+    adjektiv: "intensiv", nomen: true,
+    passt: [{ begleiter: "", adjektiv: "intensiven" }],
+    erklaerung: "Das -s am Ende (des Lernens) zeigt den Genitiv. Auch das ist ein Hinweis auf ein Nomen."
+  },
+  {
+    vor: "Für die Prüfung müssen wir viel ", wort: "lernen", nach: ".",
+    adjektiv: "intensiv", nomen: false
+  }
+];
+
+/* Begleiter, die im Spiel zur Auswahl stehen. "" = «steht schon im Satz». */
+const ADJEKTIVPROBE_BEGLEITER = ["", "der", "die", "das", "dem", "den", "des", "ein", "eine", "einem"];
+
+/* Endungen, aus denen die Adjektivformen gebildet werden. */
+const ADJEKTIVPROBE_ENDUNGEN = ["e", "en", "es", "er"];
+
+/*
+ * Texte für den Deutschen Vierer
+ * ------------------------------
+ * Schreiben Sie den Text komplett klein. Markieren Sie jedes Wort, das grossgeschrieben
+ * werden muss, mit eckigen Klammern: [Regel|wort]
+ *
+ *   Regel 1 = Satzanfänge & Titel
+ *   Regel 2 = Namen von Personen, Orten etc.
+ *   Regel 3 = Nomen und Nominalisierungen
+ *   Regel 4 = Höflichkeitspronomen (direkte Anrede: Sie, Ihnen, Ihr …)
+ *
+ * Passen mehrere Regeln, trennen Sie sie mit Komma: [1,3|ende] (Satzanfang UND Nomen).
+ * Dann gilt jede dieser Regeln als richtig.
+ * Unmarkierte Wörter bleiben klein. Ein Zeilenumbruch wird mit \n geschrieben.
+ */
+const VIERER_TEXTE = [
+  {
+    titel: "E-Mail an die Berufsbildnerin",
+    text:
+      "[1,3|betreff]: [1,3|frage] zu meiner [3|lohnabrechnung]\n\n" +
+      "[1|liebe] [2,3|frau] [2|keller]\n\n" +
+      "[1|vielen] [3|dank] für [4|ihre] [3|nachricht]. " +
+      "[1|beim] [3|kontrollieren] meiner [3|lohnabrechnung] ist mir etwas aufgefallen. " +
+      "[1|im] [3|november] fehlt die [3|zulage] für das [3|arbeiten] am [3|samstag]. " +
+      "[1|könnten] [4|sie] das bitte prüfen? " +
+      "[1|am] [3|freitag] bin ich in der [3|berufsfachschule] in [2|langenthal], " +
+      "aber am [3|montag] komme ich gerne bei [4|ihnen] vorbei.\n\n" +
+      "[1|freundliche] [3|grüsse]\n" +
+      "[1,2|lea] [2|brunner]"
+  },
+  {
+    titel: "Mein erster Lohn",
+    text:
+      "[1|mein] erster [3|lohn]\n\n" +
+      "[1|im] [3|august] habe ich meine [3|lehre] als [3|schreiner] in der [2,3|schreinerei] [2|müller] in [2|thun] begonnen. " +
+      "[1,3|ende] [3|monat] bekam ich meinen ersten [3|lohn]. " +
+      "[1|das] [3|warten] hatte sich gelohnt! " +
+      "[1|mein] [3|chef], [2,3|herr] [2|zaugg], sagte: «[1|gut] gemacht, [4|sie] haben [4|ihren] [3|lohn] verdient.» " +
+      "[1|mit] dem [3|geld] möchte ich sparen, denn das [3|sparen] ist mir wichtig. " +
+      "[1|zum] [3|feiern] habe ich mir aber eine [3|pizza] im [3|restaurant] «[1,2|bella] [2|vista]» gegönnt."
+  },
+  {
+    titel: "Tipps für Ihren Lohn",
+    text:
+      "[1,3|tipps] für [4|ihren] [3|lohn]\n\n" +
+      "[1|viele] [3|lernende] fragen sich, wie sie mit ihrem [3|lohn] umgehen sollen. " +
+      "[1|haben] [4|sie] schon ein [3|budget] erstellt? " +
+      "[1|beim] [3|planen] hilft [4|ihnen] eine einfache [3|tabelle]. " +
+      "[1|notieren] [4|sie] alle [3|einnahmen] und [3|ausgaben]. " +
+      "[1|so] behalten [4|sie] den [3|überblick], und das [3|sparen] fällt leichter. " +
+      "[1,4|ihre] [3|eltern] oder [4|ihre] [3|berufsbildnerin] helfen gerne."
+  }
+];
+
+const VIERER_REGELN = {
+  1: { kurz: "01", name: "Satzanfänge & Titel" },
+  2: { kurz: "02", name: "Namen von Personen, Orten etc." },
+  3: { kurz: "03", name: "Nomen und Nominalisierungen" },
+  4: { kurz: "04", name: "Höflichkeitspronomen" }
+};
+
+/* ================================================================
+   PROGRAMM – ab hier nichts ändern
+   ================================================================ */
+
+/* Spiel 1: Artikel-Adjektivprobe */
+(function () {
+  "use strict";
+
+  const SAETZE = ADJEKTIVPROBE_SAETZE;
+  const BEGLEITER = ADJEKTIVPROBE_BEGLEITER;
+  const ENDUNGEN = ADJEKTIVPROBE_ENDUNGEN;
+
+  const game = document.getElementById("ap-game");
+  const intro = document.getElementById("ap-intro");
+
+  let reihenfolge = [];
+  let pos = 0;
+  let resultate = [];
+  let wahl = {};
+
+  /* ---------- Hilfsfunktionen ---------- */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function gross(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+  function mischen(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function einfuegung(beg, adj) { return [beg, adj].filter(Boolean).join(" "); }
+
+  /* Satz als Text (für Rückmeldungen) */
+  function satzText(s, beg, adj, wortForm) {
+    const ins = einfuegung(beg, adj);
+    let t = s.vor + (ins ? ins + " " : "") + wortForm + s.nach;
+    t = t.replace(/\s+/g, " ").trim();
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  /* Satz als HTML mit hervorgehobener Einfügung */
+  function satzHtml(s, beg, adj) {
+    const ins = einfuegung(beg, adj);
+    const insHtml = ins ? '<span class="ins">' + esc(ins) + "</span> " : "";
+    return esc(s.vor) + insHtml + '<span class="target">' + esc(s.wort.toUpperCase()) + "</span>" + esc(s.nach);
+  }
+
+  function probePasst(s, beg, adj) {
+    if (!s.nomen) return false;
+    return (s.passt || []).some(p => p.begleiter === beg && p.adjektiv === adj);
+  }
+
+  /* ---------- Spielablauf ---------- */
+  function start() {
+    intro.style.display = "none";
+    reihenfolge = mischen(SAETZE.map((_, i) => i));
+    pos = 0;
+    resultate = [];
+    zeigeSatz();
+  }
+
+  function zeigeSatz() {
+    wahl = { beg: null, adj: null, urteil: null, form: null, geprueft: false,
+             formReihenfolge: Math.random() < 0.5 ? ["gross", "klein"] : ["klein", "gross"] };
+    render();
+  }
+
+  function render() {
+    const s = SAETZE[reihenfolge[pos]];
+    const total = reihenfolge.length;
+    const punkte = resultate.reduce((a, r) => a + r.punkte, 0);
+    const adjFormen = ENDUNGEN.map(e => s.adjektiv + e);
+    const probeGebaut = wahl.beg !== null && wahl.adj !== null;
+    const g = wahl.geprueft;
+
+    let h = "";
+    h += '<div class="card">';
+    h += '<div class="progress"><span>Satz ' + (pos + 1) + " von " + total + "</span><span>Punkte: " + punkte + " / " + (pos * 2) + "</span></div>";
+    h += '<div class="bar"><div style="width:' + (pos / total * 100) + '%"></div></div>';
+
+    h += '<p class="muted">Wird das Wort in GROSSBUCHSTABEN gross- oder kleingeschrieben?</p>';
+    h += '<div class="sentence">' + esc(s.vor) + '<span class="slot">▾</span>' +
+         '<span class="target">' + esc(s.wort.toUpperCase()) + "</span>" + esc(s.nach) + "</div>";
+
+    /* Schritt 1 */
+    h += '<div class="step' + (g ? " locked" : "") + '">';
+    h += '<div class="step-title"><span class="num">1</span>Bauen Sie die Probe: Begleiter + Adjektiv vor das Wort</div>';
+    h += '<div class="muted">Begleiter:</div><div class="chips">';
+    BEGLEITER.forEach(b => {
+      const label = b === "" ? "steht schon im Satz" : b;
+      h += '<button data-beg="' + esc(b) + '" class="' + (wahl.beg === b ? "selected" : "") + '">' + esc(label) + "</button>";
+    });
+    h += '</div><div class="muted">Adjektiv «' + esc(s.adjektiv) + '» in der passenden Form:</div><div class="chips">';
+    adjFormen.forEach(a => {
+      h += '<button data-adj="' + esc(a) + '" class="' + (wahl.adj === a ? "selected" : "") + '">' + esc(a) + "</button>";
+    });
+    h += "</div>";
+    if (probeGebaut) {
+      h += '<div class="preview">' + satzHtml(s, wahl.beg, wahl.adj) + "</div>";
+    }
+    h += "</div>";
+
+    /* Schritt 2 */
+    h += '<div class="step' + (!probeGebaut || g ? " locked" : "") + '">';
+    h += '<div class="step-title"><span class="num">2</span>Lesen Sie den Satz mit Ihrer Probe. Ist er grammatikalisch korrekt?</div>';
+    h += '<div class="chips">';
+    h += '<button data-urteil="ja" class="' + (wahl.urteil === true ? "selected" : "") + '">Ja, der Satz ist korrekt</button>';
+    h += '<button data-urteil="nein" class="' + (wahl.urteil === false ? "selected" : "") + '">Nein, der Satz ist nicht korrekt</button>';
+    h += "</div></div>";
+
+    /* Schritt 3 */
+    h += '<div class="step' + (wahl.urteil === null || g ? " locked" : "") + '">';
+    h += '<div class="step-title"><span class="num">3</span>Wie schreiben Sie das Wort im ursprünglichen Satz?</div>';
+    h += '<div class="chips">';
+    wahl.formReihenfolge.forEach(f => {
+      const wort = f === "gross" ? gross(s.wort) : s.wort;
+      h += '<button data-form="' + f + '" class="' + (wahl.form === f ? "selected" : "") + '">' + esc(wort) + "</button>";
+    });
+    h += "</div></div>";
+
+    if (g) {
+      h += feedbackHtml(s);
+      h += '<div class="actions"><button class="primary" id="weiter">' +
+           (pos + 1 < total ? "Nächster Satz →" : "Auswertung anzeigen") + "</button></div>";
+    } else {
+      h += '<div class="actions"><button class="primary" id="pruefen"' + (wahl.form ? "" : " disabled") + ">Prüfen</button></div>";
+    }
+    h += "</div>";
+    game.innerHTML = h;
+  }
+
+  function feedbackHtml(s) {
+    const r = resultate[resultate.length - 1];
+    const meinSatz = satzText(s, wahl.beg, wahl.adj, s.wort.toUpperCase());
+    const zeilen = [];
+
+    if (s.nomen && r.probeGueltig) {
+      zeilen.push("✓ Ihre Probe passt: «" + meinSatz + "» ist ein korrekter Satz.");
+    } else if (s.nomen) {
+      const p = s.passt[0];
+      zeilen.push("✗ Ihre Probe passt noch nicht: «" + meinSatz + "» ist kein korrekter Satz. " +
+        "Achten Sie auf den Begleiter und die Endung des Adjektivs. So klappt die Probe: «" +
+        satzText(s, p.begleiter, p.adjektiv, gross(s.wort)) + "»");
+    } else {
+      zeilen.push("«" + meinSatz + "» ist kein korrekter Satz. Auch mit einem anderen Begleiter oder Adjektiv wird er nicht korrekt.");
+    }
+
+    const satzKorrekt = r.probeGueltig;
+    if (r.urteilRichtig) {
+      zeilen.push("✓ Ihr Urteil stimmt: Der Satz mit Ihrer Probe ist " + (satzKorrekt ? "korrekt." : "nicht korrekt."));
+    } else {
+      zeilen.push("✗ Ihr Urteil stimmt nicht: Der Satz mit Ihrer Probe ist " + (satzKorrekt ? "korrekt." : "nicht korrekt.") +
+        " Lesen Sie ihn nochmals halblaut.");
+    }
+
+    const richtigesWort = s.nomen ? gross(s.wort) : s.wort;
+    if (r.entscheidRichtig) {
+      zeilen.push("✓ Richtig: «" + richtigesWort + "» wird " +
+        (s.nomen ? "grossgeschrieben. Es ist hier ein Nomen (Nominalisierung)." : "kleingeschrieben. Es ist hier kein Nomen."));
+    } else {
+      zeilen.push("✗ Nicht richtig: Man schreibt «" + richtigesWort + "», " +
+        (s.nomen ? "weil die Probe funktioniert. Es ist hier ein Nomen." : "weil die Probe nicht funktioniert. Es ist hier kein Nomen."));
+    }
+    if (s.erklaerung) zeilen.push("Hinweis: " + s.erklaerung);
+
+    const klasse = r.punkte === 2 ? "ok" : r.punkte === 1 ? "part" : "bad";
+    const titel = r.punkte === 2 ? "Sehr gut! 2 Punkte" : r.punkte === 1 ? "Teilweise richtig: 1 Punkt" : "Leider falsch: 0 Punkte";
+    return '<div class="feedback ' + klasse + '"><b>' + titel + "</b><ul>" +
+      zeilen.map(z => "<li>" + esc(z) + "</li>").join("") + "</ul></div>";
+  }
+
+  function pruefen() {
+    const s = SAETZE[reihenfolge[pos]];
+    const probeGueltig = probePasst(s, wahl.beg, wahl.adj);
+    const urteilRichtig = wahl.urteil === probeGueltig;
+    const entscheidRichtig = (wahl.form === "gross") === s.nomen;
+    /* Volle Punktzahl nur, wenn die Probe richtig angewendet UND richtig entschieden wurde. */
+    const probeRichtigAngewendet = s.nomen ? (probeGueltig && wahl.urteil === true) : (wahl.urteil === false);
+    let punkte = 0;
+    if (entscheidRichtig && probeRichtigAngewendet) punkte = 2;
+    else if (entscheidRichtig) punkte = 1;
+
+    resultate.push({ index: reihenfolge[pos], probeGueltig, urteilRichtig, entscheidRichtig, punkte });
+    wahl.geprueft = true;
+    render();
+  }
+
+  function weiter() {
+    pos++;
+    if (pos < reihenfolge.length) zeigeSatz();
+    else auswertung();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function auswertung() {
+    const punkte = resultate.reduce((a, r) => a + r.punkte, 0);
+    const max = resultate.length * 2;
+    const anteil = punkte / max;
+    const kommentar = anteil >= 0.9 ? "Ausgezeichnet! Sie wenden die Probe sicher an."
+      : anteil >= 0.7 ? "Gut gemacht! Schauen Sie sich die Sätze mit weniger Punkten nochmals an."
+      : "Üben Sie die Probe noch etwas. Lesen Sie jeden Satz mit der Probe halblaut vor.";
+
+    let h = '<div class="card"><h2>Auswertung</h2>';
+    h += "<p><b>" + punkte + " von " + max + " Punkten.</b> " + esc(kommentar) + "</p>";
+    h += '<table class="result"><thead><tr><th>Richtiger Satz</th><th>Punkte</th></tr></thead><tbody>';
+    resultate.forEach(r => {
+      const s = SAETZE[r.index];
+      const wort = s.nomen ? gross(s.wort) : s.wort;
+      h += "<tr><td>" + esc(s.vor) + "<b>" + esc(wort) + "</b>" + esc(s.nach) + "</td><td>" + r.punkte + " / 2</td></tr>";
+    });
+    h += "</tbody></table>";
+    h += '<div class="actions"><button class="primary" id="nochmals">Nochmals spielen</button>' +
+         '<a href="#"><button>Zur Übersicht</button></a></div></div>';
+    game.innerHTML = h;
+  }
+
+  /* ---------- Klicks ---------- */
+  game.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b || b.disabled) return;
+    if (b.id === "pruefen") return pruefen();
+    if (b.id === "weiter") return weiter();
+    if (b.id === "nochmals") return start();
+    if (wahl.geprueft) return;
+
+    if (b.dataset.beg !== undefined) {
+      wahl.beg = b.dataset.beg; wahl.urteil = null; wahl.form = null;
+    } else if (b.dataset.adj !== undefined) {
+      wahl.adj = b.dataset.adj; wahl.urteil = null; wahl.form = null;
+    } else if (b.dataset.urteil !== undefined) {
+      wahl.urteil = b.dataset.urteil === "ja"; wahl.form = null;
+    } else if (b.dataset.form !== undefined) {
+      wahl.form = b.dataset.form;
+    } else return;
+    render();
+  });
+
+  document.getElementById("ap-start").addEventListener("click", start);
+})();
+
+/* Spiel 2: Der Deutsche Vierer */
+(function () {
+  "use strict";
+
+  const TEXTE = VIERER_TEXTE;
+  const REGELN = VIERER_REGELN;
+  const game = document.getElementById("v-game");
+
+  let textNr = 0;
+  let tokens = [];   // {typ: "wort"|"txt"|"nl", text, regeln:[...] }
+  let wahl = {};     // Token-Index -> Regel (1–4)
+  let geprueft = false;
+  let loesungSichtbar = false;
+  let offenesWort = null;
+
+  /* ---------- Hilfsfunktionen ---------- */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function gross(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+  function regelText(nrn) {
+    return nrn.map(n => REGELN[n].kurz + " (" + REGELN[n].name + ")").join(" oder ");
+  }
+
+  const BUCHSTABE = "A-Za-zÀ-ÖØ-öø-ÿ";
+  const MUSTER = new RegExp(
+    "\\[([\\d,]+)\\|([^\\]]+)\\]" +                      // [1,3|wort]
+    "|([" + BUCHSTABE + "]+(?:-[" + BUCHSTABE + "]+)*)" + // normales Wort
+    "|(\\n)" +                                            // Zeilenumbruch
+    "|([^\\[\\n" + BUCHSTABE + "]+)", "g");                // alles andere
+
+  function zerlegen(text) {
+    const t = [];
+    let m;
+    MUSTER.lastIndex = 0;
+    while ((m = MUSTER.exec(text)) !== null) {
+      if (m[1]) t.push({ typ: "wort", text: m[2], regeln: m[1].split(",").map(Number) });
+      else if (m[3]) t.push({ typ: "wort", text: m[3], regeln: [] });
+      else if (m[4]) t.push({ typ: "nl" });
+      else t.push({ typ: "txt", text: m[5] });
+    }
+    return t;
+  }
+
+  /* ---------- Spielablauf ---------- */
+  function ladeText(nr) {
+    textNr = nr;
+    tokens = zerlegen(TEXTE[nr].text);
+    wahl = {};
+    geprueft = false;
+    loesungSichtbar = false;
+    offenesWort = null;
+    render();
+  }
+
+  function bewerten() {
+    const fehler = [];
+    let richtig = 0, total = 0;
+    tokens.forEach((t, i) => {
+      if (t.typ !== "wort") return;
+      const soll = t.regeln;
+      const ist = wahl[i];
+      if (soll.length) total++;
+      if (soll.length && ist && soll.includes(ist)) { richtig++; t.res = "ok"; }
+      else if (soll.length && ist) {
+        t.res = "rule";
+        fehler.push("«" + gross(t.text) + "»: richtig grossgeschrieben, aber falsche Regel. Richtig ist " + regelText(soll) + ".");
+      } else if (soll.length) {
+        t.res = "missed";
+        fehler.push("«" + gross(t.text) + "» haben Sie übersehen. Es wird grossgeschrieben: Regel " + regelText(soll) + ".");
+      } else if (ist) {
+        t.res = "false";
+        fehler.push("«" + t.text + "» wird kleingeschrieben." +
+          (ist === 3 ? " Machen Sie die Adjektivprobe: Sie funktioniert hier nicht." : "") +
+          (ist === 4 && /^(sie|ihr|ihre|ihrem|ihren|ihrer|ihres|ihnen)$/.test(t.text) ? " Hier ist niemand direkt angesprochen." : ""));
+      } else t.res = null;
+    });
+    const falsch = tokens.filter(t => t.res === "false").length;
+    return { richtig, total, falsch, fehler };
+  }
+
+  function render() {
+    const tx = TEXTE[textNr];
+    let h = "";
+
+    /* Textauswahl */
+    h += '<div class="chips" style="margin-bottom:12px">';
+    TEXTE.forEach((t, i) => {
+      h += '<button data-text="' + i + '" class="' + (i === textNr ? "selected" : "") + '">Text ' + (i + 1) + ": " + esc(t.titel) + "</button>";
+    });
+    h += "</div>";
+
+    h += '<div class="card">';
+    const anzahl = Object.keys(wahl).length;
+    h += '<div class="progress"><span>Markierte Wörter: ' + anzahl + "</span>" +
+         (geprueft ? "" : '<span class="muted">Klick auf ein Wort öffnet die Auswahl</span>') + "</div>";
+
+    let ergebnis = null;
+    if (geprueft) ergebnis = bewerten();
+
+    h += '<div class="text-box' + (geprueft ? " checked" : "") + '" id="textbox">';
+    tokens.forEach((t, i) => {
+      if (t.typ === "nl") { h += "<br>"; return; }
+      if (t.typ === "txt") { h += esc(t.text); return; }
+      const regel = wahl[i];
+      let klassen = "w";
+      let inhalt = esc(t.text);
+      let titel = "";
+      if (loesungSichtbar) {
+        if (t.regeln.length) {
+          klassen += " c" + t.regeln[0];
+          inhalt = esc(gross(t.text)) + "<sup>" + t.regeln.join("/") + "</sup>";
+          titel = "Regel " + regelText(t.regeln);
+        }
+      } else {
+        if (regel) { klassen += " c" + regel; inhalt = esc(gross(t.text)) + "<sup>" + regel + "</sup>"; }
+        /* Übersehene Wörter werden NICHT verraten, nur gezählt. */
+        if (geprueft && t.res && t.res !== "missed") klassen += " res-" + t.res;
+      }
+      if (offenesWort === i) klassen += " active";
+      h += '<span class="' + klassen + '" data-i="' + i + '"' + (titel ? ' title="' + esc(titel) + '"' : "") + ">" + inhalt + "</span>";
+    });
+    h += "</div>";
+
+    if (geprueft && !loesungSichtbar) {
+      const n = r => tokens.filter(t => t.res === r).length;
+      const fRegel = n("rule"), fFalsch = n("false"), fMissed = n("missed");
+      const voll = ergebnis.richtig === ergebnis.total && ergebnis.falsch === 0;
+      const klasse = voll ? "ok" : ergebnis.richtig / ergebnis.total >= 0.7 ? "part" : "bad";
+      h += '<div class="feedback ' + klasse + '"><b>' + ergebnis.richtig + " von " + ergebnis.total +
+           " Wörtern sind richtig gross und haben die richtige Regel.</b>";
+      if (voll) {
+        h += "<p style='margin-top:6px'>Ausgezeichnet! Alles richtig.</p>";
+      } else {
+        h += '<ul class="errors">';
+        if (fRegel) h += "<li><b>" + fRegel + "</b> Wort/Wörter sind richtig gross, aber die Regel stimmt nicht (orange markiert).</li>";
+        if (fFalsch) h += "<li><b>" + fFalsch + "</b> Wort/Wörter haben Sie grossgeschrieben, obwohl sie klein bleiben (rot markiert). Tipp: Bei Nomen hilft die Adjektivprobe, bei «sie/ihr» die Frage: Wird hier jemand direkt angesprochen?</li>";
+        if (fMissed) h += "<li><b>" + fMissed + "</b> Wort/Wörter haben Sie noch übersehen. Lesen Sie den Text nochmals genau.</li>";
+        h += "</ul><p style='margin:8px 0 0'>Klicken Sie auf «Fehler korrigieren» und versuchen Sie es nochmals.</p>";
+      }
+      h += "</div>";
+      h += '<div class="legend">' +
+        '<span><i style="background:var(--ok-bg);border:1px solid #b9dfbe"></i>richtig</span>' +
+        '<span><i style="background:var(--warn-bg);border:1px solid #ecd3a6"></i>gross ja, aber falsche Regel</span>' +
+        '<span><i style="background:var(--bad-bg);border:1px solid #efc4c1"></i>fälschlich gross</span></div>';
+    }
+    if (loesungSichtbar) {
+      h += '<div class="feedback part"><b>Lösung</b>: Alle grossgeschriebenen Wörter sind in der Farbe ihrer Regel markiert. ' +
+           "Die kleine Zahl zeigt die Regel. Fahren Sie mit der Maus über ein Wort, um die Regel zu lesen.";
+      if (ergebnis && ergebnis.fehler.length) {
+        h += "<p style='margin:8px 0 0'><b>Ihre Fehler:</b></p><ul class=\"errors\">" +
+             ergebnis.fehler.map(f => "<li>" + esc(f) + "</li>").join("") + "</ul>";
+      }
+      h += "</div>";
+    }
+
+    h += '<div class="actions">';
+    if (!geprueft) {
+      h += '<button class="primary" id="pruefen">Prüfen</button>';
+      h += '<button id="reset">Alles zurücksetzen</button>';
+    } else {
+      if (!loesungSichtbar) h += '<button class="primary" id="korrigieren">Fehler korrigieren</button>';
+      h += '<button id="loesung">' + (loesungSichtbar ? "Meine Lösung zeigen" : "Lösung zeigen") + "</button>";
+      if (textNr + 1 < TEXTE.length) h += '<button id="naechster">Nächster Text →</button>';
+    }
+    h += "</div></div>";
+
+    game.innerHTML = h;
+    if (offenesWort !== null) zeigeMenu(offenesWort);
+  }
+
+  function zeigeMenu(i) {
+    const box = document.getElementById("textbox");
+    const el = box.querySelector('[data-i="' + i + '"]');
+    if (!el) return;
+    const menu = document.createElement("div");
+    menu.className = "menu";
+    menu.id = "menu";
+    let h = '<div class="menu-title">Warum wird «' + esc(gross(tokens[i].text)) + "» grossgeschrieben?</div>";
+    [1, 2, 3, 4].forEach(n => {
+      h += '<button class="m' + n + (wahl[i] === n ? " selected" : "") + '" data-regel="' + n + '"><b>' +
+           REGELN[n].kurz + "</b> " + esc(REGELN[n].name) + "</button>";
+    });
+    h += '<button class="m0" data-regel="0">klein lassen</button>';
+    menu.innerHTML = h;
+    box.appendChild(menu);
+
+    /* Menü unter dem Wort platzieren, innerhalb des Textfelds */
+    const bRect = box.getBoundingClientRect();
+    const wRect = el.getBoundingClientRect();
+    let left = wRect.left - bRect.left;
+    const maxLeft = box.clientWidth - menu.offsetWidth - 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    menu.style.left = left + "px";
+    menu.style.top = (wRect.bottom - bRect.top + 6) + "px";
+  }
+
+  /* ---------- Klicks ---------- */
+  game.addEventListener("click", e => {
+    const regelBtn = e.target.closest("[data-regel]");
+    if (regelBtn) {
+      const n = Number(regelBtn.dataset.regel);
+      if (n === 0) delete wahl[offenesWort]; else wahl[offenesWort] = n;
+      offenesWort = null;
+      return render();
+    }
+    const wort = e.target.closest(".w");
+    if (wort && !geprueft) {
+      const i = Number(wort.dataset.i);
+      offenesWort = offenesWort === i ? null : i;
+      return render();
+    }
+    const b = e.target.closest("button");
+    if (!b) {
+      if (offenesWort !== null && !e.target.closest("#menu")) { offenesWort = null; render(); }
+      return;
+    }
+    if (b.dataset.text !== undefined) return ladeText(Number(b.dataset.text));
+    switch (b.id) {
+      case "pruefen": geprueft = true; offenesWort = null; break;
+      case "reset": wahl = {}; offenesWort = null; break;
+      case "korrigieren": geprueft = false; tokens.forEach(t => { t.res = null; }); break;
+      case "loesung": loesungSichtbar = !loesungSichtbar; break;
+      case "naechster": ladeText(textNr + 1); window.scrollTo({ top: 0, behavior: "smooth" }); return;
+      default: return;
+    }
+    render();
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && offenesWort !== null) { offenesWort = null; render(); }
+  });
+
+  ladeText(0);
+})();
+
+/* Navigation zwischen Startseite und Spielen */
+(function () {
+  const titel = { "": "Grossschreibung üben", adjektivprobe: "Artikel-Adjektivprobe", vierer: "Der Deutsche Vierer" };
+  function zeige() {
+    let ziel = location.hash.replace("#", "");
+    if (!(ziel in titel)) ziel = "";
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+    document.getElementById("view-" + (ziel || "start")).classList.add("on");
+    document.getElementById("kopf").textContent = titel[ziel];
+    document.body.classList.toggle("ingame", ziel !== "");
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", zeige);
+  zeige();
+})();
+</script>
+</body>
+</html>
